@@ -44,7 +44,7 @@ import Data.DeepLenses (deepLenses)
 
 newtype S = S Int
 
-newtype Inner = Inner { innerS :: S }
+newtype Inner = Inner { _innerS :: S }
 deepLenses ''Inner
 
 data Mid = Mid { _midInner :: Inner }
