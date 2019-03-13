@@ -1,0 +1,80 @@
+name: cornea
+version: 0.1.0.0
+synopsis: classy optical monadic state
+description: Please see the README on GitHub at <https://github.com/tek/cornea>
+github: "tek/cornea"
+license: OtherLicense
+license-file: LICENSE
+author: "Torsten Schmits"
+maintainer: "tek@tryp.io"
+copyright: "2019 Torsten Schmits"
+category: Lens
+build-type: Simple
+
+extra-source-files:
+- README.md
+
+dependencies:
+- base >= 4.7 && < 5
+- lens
+- transformers
+- mtl
+- template-haskell
+- th-abstraction
+
+library:
+ source-dirs: lib
+
+default-extensions:
+- AutoDeriveTypeable
+- BangPatterns
+- BinaryLiterals
+- ConstraintKinds
+- DataKinds
+- DefaultSignatures
+- DeriveDataTypeable
+- DeriveFoldable
+- DeriveFunctor
+- DeriveGeneric
+- DeriveTraversable
+- DoAndIfThenElse
+- EmptyDataDecls
+- ExistentialQuantification
+- FlexibleContexts
+- FlexibleInstances
+- FunctionalDependencies
+- GADTs
+- GeneralizedNewtypeDeriving
+- InstanceSigs
+- KindSignatures
+- LambdaCase
+- MonadFailDesugaring
+- MultiParamTypeClasses
+- MultiWayIf
+- NamedFieldPuns
+- OverloadedStrings
+- PartialTypeSignatures
+- PatternGuards
+- PolyKinds
+- RankNTypes
+- RecordWildCards
+- ScopedTypeVariables
+- StandaloneDeriving
+- TupleSections
+- TypeApplications
+- TypeFamilies
+- TypeSynonymInstances
+- UnicodeSyntax
+- ViewPatterns
+
+tests:
+  cornea-unit:
+    main: SpecMain.hs
+    source-dirs: test/u
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - cornea
+    - HTF
