@@ -1,6 +1,7 @@
 # Intro
 
 Classes for accessing and mutating nested data types with corresponding adapter classes for `MonadState` and `MonadError`.
+Inspired by the [next level mtl with classy optics] talk.
 
 # Internals
 
@@ -71,3 +72,4 @@ main = do
 
 [lens]: https://hackage.haskell.org/package/lens
 [TH]: https://hackage.haskell.org/package/template-haskell
+[next level mtl with classy optics]: https://github.com/gwils/next-level-mtl-with-classy-optics
