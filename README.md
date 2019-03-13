@@ -31,7 +31,7 @@ main :: IO (Either Outer ())
 main = runExceptT throwDeep
 ```
 
-In `main`, `MonadError Outer IO` and `DeepPrisms Outer Inner` is summoned.
+In `main`, `MonadError Outer IO` and `DeepPrisms Outer Inner` are summoned.
 
 Analogously for `MonadState`:
 
