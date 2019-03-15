@@ -12,7 +12,13 @@ import Language.Haskell.TH.Datatype (
   DatatypeInfo(datatypeCons, datatypeName),
   reifyDatatype,
   )
-import Language.Haskell.TH.Syntax (ModName(..), Name(Name), NameFlavour(NameQ, NameS, NameG), OccName(..))
+import Language.Haskell.TH.Syntax (
+  ModName(..),
+  Name(Name),
+  NameFlavour(NameQ, NameS, NameG),
+  NameSpace(VarName),
+  OccName(..),
+  )
 
 class DeepPrisms e e' where
   prism :: Prism' e e'
@@ -91,13 +97,22 @@ sameModule f1 f2 =
     (Just a, Just b) | a == b -> True
     _ -> False
 
+-- |Convert a constructor's NameFlavour to one for a prism
+-- The NameSpace field is DataName for the constructor and must be VarName
+-- Curiously, this only surfaces as a bug when having a certain nesting level across modules
+prismFlavour :: NameFlavour -> NameFlavour
+prismFlavour (NameG _ pkg mod') =
+  NameG VarName pkg mod'
+prismFlavour n =
+  n
+
 prismName :: Name -> Name -> ExpQ
-prismName (Name _ topFlavour) (Name (OccName n) prismFlavour) =
+prismName (Name _ topFlavour) (Name (OccName n) localFlavour) =
   varE (Name (OccName ('_' : n)) flavour)
   where
     flavour
-      | sameModule topFlavour prismFlavour = NameS
-      | otherwise = prismFlavour
+      | sameModule topFlavour localFlavour = NameS
+      | otherwise = prismFlavour localFlavour
 
 deepInstances :: Name -> [Name] -> Name -> Name -> DecsQ
 deepInstances top intermediate name tpe = do
