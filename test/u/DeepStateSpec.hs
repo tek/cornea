@@ -19,8 +19,14 @@ newtype S2 =
   S2 Int
   deriving (Eq, Show)
 
+newtype S =
+  SC { _sS1 :: S1 }
+  deriving (Eq, Show)
+
+deepLenses ''S
+
 newtype Bot =
-  BotC { _botS1 :: S1 }
+  BotC { _botS :: S }
   deriving (Eq, Show)
 
 deepLenses ''Bot
@@ -44,13 +50,13 @@ newtype MainS =
 
 deepLenses ''MainS
 
-stateDeep :: MonadDeepState s Bot m => m ()
+stateDeep :: MonadDeepState s S m => m ()
 stateDeep = do
-  (BotC (S1 a)) <- get
-  b <- gets $ \(BotC (S1 b)) -> b
-  put (BotC (S1 (a + b + 3)))
+  (SC (S1 a)) <- get
+  b <- gets $ \(SC (S1 b)) -> b
+  put (SC (S1 (a + b + 3)))
 
 test_lens :: IO ()
 test_lens = do
-  a <- execStateT stateDeep (MainSC (MiddleSC (BotC (S1 5)) (S2 1)))
-  assertEqual (MainSC (MiddleSC (BotC (S1 13)) (S2 1))) a
+  a <- execStateT stateDeep (MainSC (MiddleSC (BotC (SC (S1 5))) (S2 1)))
+  assertEqual (MainSC (MiddleSC (BotC (SC (S1 13))) (S2 1))) a

@@ -27,12 +27,20 @@ data Err =
 
 deepPrisms ''Err
 
+data Bot =
+  BotC Err
+  |
+  BotOther Err2
+  deriving (Eq, Show)
+
+deepPrisms ''Bot
+
 newtype MiddleOther =
   MiddleOther Int
   deriving (Eq, Show)
 
 data MiddleErr =
-  MiddleErrC Err
+  MiddleErrC Bot
   |
   MiddleErrOther MiddleOther
   deriving (Eq, Show)
@@ -59,4 +67,4 @@ test_hoist :: IO ()
 test_hoist = do
   -- traverse_ putStrLn $ lines $(stringE . pprint =<< deepPrisms ''MainErr)
   a <- runExceptT throwDeep
-  assertEqual (Left (MainErrC (MiddleErrC (ErrC (Err1 5))))) a
+  assertEqual (Left (MainErrC (MiddleErrC (BotC (ErrC (Err1 5)))))) a

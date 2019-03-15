@@ -106,7 +106,7 @@ deepInstances top intermediate name tpe = do
   return (current : sub)
   where
     compose = appE . appE [|(.)|] . prismName top
-    body = foldr compose (prismName top name) intermediate
+    body = foldr compose (prismName top name) (reverse intermediate)
 
 deepInstancesIfEligible :: Name -> [Name] -> Ctor -> DecsQ
 deepInstancesIfEligible top intermediate (Ctor name [ConT tpe]) = do
