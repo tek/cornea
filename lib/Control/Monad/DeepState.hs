@@ -1,5 +1,6 @@
 module Control.Monad.DeepState where
 
+import Control.Lens (Lens')
 import qualified Control.Lens as Lens (set, view)
 import Control.Monad.State.Class (MonadState)
 import qualified Control.Monad.State.Class as MS (MonadState(get), modify)
@@ -31,6 +32,14 @@ modifyM :: MonadDeepState s s' m => (s' -> m s') -> m ()
 modifyM f =
   stateM (fmap ((),) . f)
 
-modify :: MonadDeepState s s' m => (s' -> s') -> m ()
+modify :: ∀ s' s m. MonadDeepState s s' m => (s' -> s') -> m ()
 modify f =
   modifyM (pure . f)
+
+getsL :: ∀ s' s m a. MonadDeepState s s' m => Lens' s' a -> m a
+getsL =
+  gets . Lens.view
+
+setL :: ∀ s' s m a. MonadDeepState s s' m => Lens' s' a -> a -> m ()
+setL lens =
+  modify . Lens.set lens
