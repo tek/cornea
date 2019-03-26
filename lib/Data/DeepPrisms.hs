@@ -5,11 +5,12 @@ module Data.DeepPrisms where
 
 import Control.Lens (Prism', makeClassyPrisms)
 import qualified Control.Lens as Lens (preview, review)
-import Control.Monad (join, (<=<))
+import Control.Monad (filterM)
+import Data.Maybe (mapMaybe)
 import Language.Haskell.TH
 import Language.Haskell.TH.Datatype (
   ConstructorInfo(constructorName, constructorFields),
-  DatatypeInfo(datatypeCons, datatypeName),
+  DatatypeInfo(datatypeCons),
   reifyDatatype,
   )
 import Language.Haskell.TH.Syntax (
@@ -34,28 +35,36 @@ retrieve =
 data Ctor =
   Ctor {
     ctorName :: Name,
-    ctorTypes :: [Type]
+    ctorType :: Name
   }
+  deriving (Eq, Show)
 
 data SubError =
   SubError {
     seCtor :: Name,
     seWrapped :: Name
   }
+  deriving (Eq, Show)
 
-ctor :: ConstructorInfo -> Ctor
-ctor info = Ctor (constructorName info) (constructorFields info)
-
-data DT =
-  DT {
-    dtName :: Name,
-    dtCons :: [Ctor]
+data PrismsInstance =
+  PrismsInstance {
+    prismInstanceName :: Name,
+    prismInstanceDec :: Dec
   }
+  deriving (Eq, Show)
 
-dataType :: Name -> Q DT
-dataType name = do
-  info <- reifyDatatype name
-  return $ DT (datatypeName info) (ctor <$> datatypeCons info)
+ctor :: ConstructorInfo -> Maybe Ctor
+ctor info =
+  cons (constructorFields info)
+  where
+    cons [ConT tpe] =
+      Just $ Ctor (constructorName info) tpe
+    cons _ =
+      Nothing
+
+dataType :: Name -> Q [Ctor]
+dataType =
+  fmap (mapMaybe ctor . datatypeCons) . reifyDatatype
 
 mkHoist :: TypeQ -> TypeQ -> BodyQ -> DecQ
 mkHoist _ _ body = do
@@ -73,15 +82,10 @@ idInstance name =
     nt = conT name
     body = normalB [|id|]
 
-eligibleForDeepError :: Name -> Q Bool
-eligibleForDeepError tpe = do
+typeHasDeepPrisms :: Ctor -> Q Bool
+typeHasDeepPrisms (Ctor _ tpe) = do
   (ConT name) <- [t|DeepPrisms|]
   isInstance name [ConT tpe, ConT tpe]
-
-subInstances :: Name -> [Name] -> Name -> DecsQ
-subInstances top intermediate local = do
-  (DT _ subCons) <- dataType local
-  join <$> traverse (deepInstancesIfEligible top intermediate) subCons
 
 modName :: NameFlavour -> Maybe ModName
 modName (NameQ mod') =
@@ -114,34 +118,34 @@ prismName (Name _ topFlavour) (Name (OccName n) localFlavour) =
       | sameModule topFlavour localFlavour = NameS
       | otherwise = prismFlavour localFlavour
 
-deepInstances :: Name -> [Name] -> Name -> Name -> DecsQ
-deepInstances top intermediate name tpe = do
-  current <- deepPrismsInstance (conT top) (conT tpe) (normalB body)
-  sub <- subInstances top (name : intermediate) tpe
-  return (current : sub)
+constructorPrism :: Name -> [Name] -> Ctor -> Q PrismsInstance
+constructorPrism top intermediate (Ctor name tpe) = do
+  inst <- deepPrismsInstance (conT top) (conT tpe) (normalB body)
+  return (PrismsInstance tpe inst)
   where
     compose = appE . appE [|(.)|] . prismName top
     body = foldr compose (prismName top name) (reverse intermediate)
 
-deepInstancesIfEligible :: Name -> [Name] -> Ctor -> DecsQ
-deepInstancesIfEligible top intermediate (Ctor name [ConT tpe]) = do
-  eligible <- eligibleForDeepError tpe
-  if eligible then deepInstances top intermediate name tpe else return []
-deepInstancesIfEligible _ _ _ =
-  return []
+filterDuplicates :: [Ctor] -> [PrismsInstance] -> [PrismsInstance]
+filterDuplicates created = filter (not . (`elem` (ctorType <$> created)) . prismInstanceName)
 
-errorInstances :: DT -> DecsQ
-errorInstances (DT name cons) = do
+prismsForData :: Name -> [Name] -> Name -> Q [PrismsInstance]
+prismsForData top intermediate local = do
+  cons <- filterM typeHasDeepPrisms =<< dataType local
+  localInstances <- traverse (constructorPrism top intermediate) cons
+  deepInstances <- traverse recurse cons
+  return (localInstances ++ (deepInstances >>= filterDuplicates cons))
+  where
+    recurse (Ctor name tpe) = prismsForData top (name : intermediate) tpe
+
+prismsForMainData :: Name -> DecsQ
+prismsForMainData name = do
   idInst <- idInstance name
-  deepInsts <- traverse (deepInstancesIfEligible name []) cons
-  return (idInst : join deepInsts)
-
-deepPrisms' :: Name -> DecsQ
-deepPrisms' =
-  errorInstances <=< dataType
+  insts <- prismsForData name [] name
+  return (idInst : (prismInstanceDec <$> insts))
 
 deepPrisms :: Name -> DecsQ
 deepPrisms name = do
-  prisms <- makeClassyPrisms name
-  err <- deepPrisms' name
-  return $ prisms ++ err
+  basic <- makeClassyPrisms name
+  deep <- prismsForMainData name
+  return $ basic ++ deep
