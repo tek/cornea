@@ -3,6 +3,7 @@ module Control.Monad.DeepError where
 import Control.Monad.Error.Class (MonadError(throwError, catchError))
 
 import Data.DeepPrisms (DeepPrisms, hoist, retrieve)
+import Data.Either.Combinators (mapLeft)
 
 class (MonadError e m, DeepPrisms e e') => MonadDeepError e e' m where
   throwHoist :: e' -> m a
@@ -20,6 +21,10 @@ catchAt handle ma =
 hoistEither :: MonadDeepError e e' m => Either e' a -> m a
 hoistEither =
   either throwHoist return
+
+hoistEitherWith :: MonadDeepError e e'' m => (e' -> e'') -> Either e' a -> m a
+hoistEitherWith f =
+  hoistEither . mapLeft f
 
 hoistMaybe :: MonadDeepError e e' m => e' -> Maybe a -> m a
 hoistMaybe e' =
