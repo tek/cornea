@@ -5,7 +5,7 @@ module Data.DeepPrisms where
 
 import Control.Lens (Prism', makeClassyPrisms)
 import qualified Control.Lens as Lens (preview, review)
-import Control.Monad (filterM)
+import Control.Monad (filterM, (<=<))
 import Data.Maybe (mapMaybe)
 import Language.Haskell.TH
 import Language.Haskell.TH.Datatype (
@@ -127,11 +127,21 @@ constructorPrism top intermediate (Ctor name tpe) = do
     body = foldr compose (prismName top name) (reverse intermediate)
 
 filterDuplicates :: [Ctor] -> [PrismsInstance] -> [PrismsInstance]
-filterDuplicates created = filter (not . (`elem` (ctorType <$> created)) . prismInstanceName)
+filterDuplicates created =
+  filter (not . (`elem` (ctorType <$> created)) . prismInstanceName)
+
+deepPrismCtors :: Name -> Q [Ctor]
+deepPrismCtors =
+  filterM typeHasDeepPrisms <=< dataType
+
+basicPrisms :: Name -> DecsQ
+basicPrisms name = do
+  ctors <- dataType name
+  if length ctors > 1 then makeClassyPrisms name else return []
 
 prismsForData :: Name -> [Name] -> Name -> Q [PrismsInstance]
 prismsForData top intermediate local = do
-  cons <- filterM typeHasDeepPrisms =<< dataType local
+  cons <- deepPrismCtors local
   localInstances <- traverse (constructorPrism top intermediate) cons
   deepInstances <- traverse recurse cons
   return (localInstances ++ (deepInstances >>= filterDuplicates cons))
@@ -146,6 +156,6 @@ prismsForMainData name = do
 
 deepPrisms :: Name -> DecsQ
 deepPrisms name = do
-  basic <- makeClassyPrisms name
+  basic <- basicPrisms name
   deep <- prismsForMainData name
   return $ basic ++ deep

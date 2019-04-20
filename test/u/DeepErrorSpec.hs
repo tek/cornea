@@ -5,7 +5,10 @@ module DeepErrorSpec(
   htf_thisModulesTests,
 ) where
 
+import Control.Monad (when)
 import Control.Monad.Trans.Except (runExceptT)
+import Data.Foldable (traverse_)
+import Language.Haskell.TH
 import Test.Framework
 
 import Control.Monad.DeepError (MonadDeepError(throwHoist))
@@ -16,7 +19,7 @@ newtype Err1 =
   deriving (Eq, Show)
 
 newtype Err2 =
-  Err2 Int
+  Err2C Int
   deriving (Eq, Show)
 
 data Err =
@@ -63,8 +66,14 @@ throwDeep :: MonadDeepError e Err m => m ()
 throwDeep =
   throwHoist (ErrC (Err1 5))
 
+debugPrint :: IO ()
+debugPrint =
+  traverse_ putStrLn $ lines $(stringE . pprint =<< deepPrisms ''Err2)
+
 test_hoist :: IO ()
 test_hoist = do
-  -- traverse_ putStrLn $ lines $(stringE . pprint =<< deepPrisms ''MainErr)
+  when debug debugPrint
   a <- runExceptT throwDeep
   assertEqual (Left (MainErrC (MiddleErrC (BotC (ErrC (Err1 5)))))) a
+  where
+    debug = False
