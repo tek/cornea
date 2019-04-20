@@ -12,7 +12,7 @@ instance (MonadError e m, DeepPrisms e e') => MonadDeepError e e' m where
   throwHoist =
     throwError . hoist
 
-catchAt :: (MonadError e m, DeepPrisms e e') => (e' -> m a) -> m a -> m a
+catchAt :: ∀ e' e m a. (MonadError e m, DeepPrisms e e') => (e' -> m a) -> m a -> m a
 catchAt handle ma =
   catchError ma f
   where
