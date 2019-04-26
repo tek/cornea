@@ -14,8 +14,8 @@ import Language.Haskell.TH.Datatype (
   )
 import Language.Haskell.TH.Syntax (ModName(..), Name(Name), NameFlavour(NameQ, NameS, NameG), OccName(..))
 
-class DeepLenses e e' where
-  deepLens :: Lens' e e'
+class DeepLenses s s' where
+  deepLens :: Lens' s s'
 
 data Field =
   Field {
@@ -78,11 +78,11 @@ sameModule f1 f2 =
 
 lensName :: Name -> Name -> ExpQ
 lensName (Name _ topFlavour) (Name (OccName n) lensFlavour) =
-  varE (Name (OccName (lensName' n)) flavour)
+  varE (Name (OccName (lensNams' n)) flavour)
   where
-    lensName' ('_' : t) = t
-    lensName' [] = []
-    lensName' a = a
+    lensNams' ('_' : t) = t
+    lensNams' [] = []
+    lensNams' a = a
     flavour
       | sameModule topFlavour lensFlavour = NameS
       | otherwise = lensFlavour

@@ -1,40 +1,52 @@
+{-# LANGUAGE UndecidableInstances #-}
+
 module Control.Monad.DeepState where
 
 import Control.Lens (Lens')
 import qualified Control.Lens as Lens (over, set, view, views)
 import Control.Monad.State.Class (MonadState)
 import qualified Control.Monad.State.Class as MS (MonadState(get), modify)
+import Control.Monad.Trans.Class (MonadTrans(lift))
+import qualified Control.Monad.Trans.State.Lazy as Lazy (StateT)
+import Control.Monad.Trans.State.Strict (StateT)
+import Data.Either.Combinators (rightToMaybe, swapEither)
+import Data.Functor (void)
 
 import Data.DeepLenses (DeepLenses(deepLens))
 
-class (MonadState s m, DeepLenses s s') => MonadDeepState s s' m where
+class Monad m => MonadDeepState (s :: *) (s' :: *) (m :: * -> *) | m -> s where
   get :: m s'
   put :: s' -> m ()
-  stateM :: (s' -> m (a, s')) -> m a
+  modifyE :: ∀ e . (s' -> Either e s') -> m (Maybe e)
+  modifyE f = do
+    e <- f <$> get
+    either (return . Just) (\ s' -> Nothing <$ put s') e
+  state :: (s' -> (a, s')) -> m a
+  state f = do
+    ~(a, s'') <- f <$> get
+    a <$ put s''
 
-instance (MonadState s m, DeepLenses s s') => MonadDeepState s s' m where
+instance {-# OVERLAPPING #-} (Monad m, DeepLenses s s') => MonadDeepState s s' (Lazy.StateT s m) where
   get = Lens.view deepLens <$> MS.get
   put = MS.modify . Lens.set deepLens
-  stateM f = do
-    s' <- get
-    ~(a, s'') <- f s'
-    put s''
-    return a
 
-state :: MonadDeepState s s' m => (s' -> (a, s')) -> m a
-state f = stateM (pure . f)
+instance {-# OVERLAPPING #-} (Monad m, DeepLenses s s') => MonadDeepState s s' (StateT s m) where
+  get = Lens.view deepLens <$> MS.get
+  put = MS.modify . Lens.set deepLens
+
+instance {-# OVERLAPPABLE #-} (Monad (t m), MonadTrans t, MonadDeepState s s' m) => MonadDeepState s s' (t m) where
+  get = lift get
+  put = lift . put
+  modifyE = lift . modifyE
+  state = lift . state
 
 gets :: MonadDeepState s s' m => (s' -> a) -> m a
 gets =
   (<$> get)
 
-modifyM :: MonadDeepState s s' m => (s' -> m s') -> m ()
-modifyM f =
-  stateM (fmap ((),) . f)
-
-modify :: ∀ s' s m. MonadDeepState s s' m => (s' -> s') -> m ()
-modify f =
-  modifyM (pure . f)
+modify :: MonadDeepState s s' m => (s' -> s') -> m ()
+modify =
+  void . modifyE . (Right .)
 
 modifyL :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> a) -> m ()
 modifyL lens f =
