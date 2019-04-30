@@ -40,11 +40,19 @@ instance {-# OVERLAPPABLE #-} (Monad (t m), MonadTrans t, MonadDeepState s s' m)
   modifyE = lift . modifyE
   state = lift . state
 
-gets :: MonadDeepState s s' m => (s' -> a) -> m a
+gets ::
+  ∀ s' s m a .
+  MonadDeepState s s' m =>
+  (s' -> a) ->
+  m a
 gets =
   (<$> get)
 
-modify :: MonadDeepState s s' m => (s' -> s') -> m ()
+modify ::
+  ∀ s' s m a .
+  MonadDeepState s s' m =>
+  (s' -> s') ->
+  m ()
 modify =
   void . modifyE . (Right .)
 
