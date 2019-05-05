@@ -1,6 +1,8 @@
 module Control.Monad.DeepError where
 
+import Control.Exception (Exception, IOException, SomeException)
 import Control.Monad.Error.Class (MonadError(throwError, catchError))
+import Control.Monad.Trans.Control (MonadBaseControl)
 
 import Data.DeepPrisms (DeepPrisms, hoist, retrieve)
 import Data.Either.Combinators (mapLeft)
@@ -26,8 +28,52 @@ hoistEitherWith :: MonadDeepError e e'' m => (e' -> e'') -> Either e' a -> m a
 hoistEitherWith f =
   hoistEither . mapLeft f
 
-hoistMaybe :: MonadDeepError e e' m => e' -> Maybe a -> m a
+hoistMaybe ::
+  MonadDeepError e e' m =>
+  e' ->
+  Maybe a ->
+  m a
 hoistMaybe e' =
   maybe (throwHoist e') return
+
+tryHoist ::
+  MonadBaseControl IO m =>
+  MonadDeepError e e' m =>
+  Exception ex =>
+  (ex -> e') ->
+  m ()
+tryHoist =
+  undefined
+
+tryHoistIO ::
+  MonadBaseControl IO m =>
+  MonadDeepError e e' m =>
+  (IOException -> e') ->
+  m ()
+tryHoistIO =
+  undefined
+
+tryHoistIOAs ::
+  MonadBaseControl IO m =>
+  MonadDeepError e e' m =>
+  e' ->
+  m ()
+tryHoistIOAs =
+  undefined
+
+tryHoistAny ::
+  MonadBaseControl IO m =>
+  MonadDeepError e e' m =>
+  (SomeException -> e') ->
+  m ()
+tryHoistAny =
+  undefined
+
+tryHoistAnyAs ::
+  MonadDeepError e e' m =>
+  e' ->
+  m ()
+tryHoistAnyAs =
+  undefined
 
 -- TODO derive multiple errors with HList + Generic

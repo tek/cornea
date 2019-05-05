@@ -22,6 +22,7 @@ dependencies:
 - template-haskell
 - th-abstraction
 - either
+- monad-control
 
 library:
  source-dirs: lib
