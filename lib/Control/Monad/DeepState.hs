@@ -3,7 +3,7 @@
 module Control.Monad.DeepState where
 
 import Control.Lens (Lens')
-import qualified Control.Lens as Lens (over, set, view, views)
+import qualified Control.Lens as Lens (mapMOf, over, set, view, views)
 import Control.Monad.State.Class (MonadState)
 import qualified Control.Monad.State.Class as MS (MonadState(get), modify)
 import Control.Monad.Trans.Class (MonadTrans(lift))
@@ -17,14 +17,16 @@ import Data.DeepLenses (DeepLenses(deepLens))
 class Monad m => MonadDeepState (s :: *) (s' :: *) (m :: * -> *) | m -> s where
   get :: m s'
   put :: s' -> m ()
-  modifyE :: ∀ e . (s' -> Either e s') -> m (Maybe e)
-  modifyE f = do
-    e <- f <$> get
-    either (return . Just) (\ s' -> Nothing <$ put s') e
   state :: (s' -> (a, s')) -> m a
   state f = do
     ~(a, s'') <- f <$> get
     a <$ put s''
+  modifyM :: (s' -> m s') -> m ()
+  modifyM f =
+    put =<< f =<< get
+  modify :: (s' -> s') -> m ()
+  modify f =
+    modifyM (pure . f)
 
 instance {-# OVERLAPPING #-} (Monad m, DeepLenses s s') => MonadDeepState s s' (Lazy.StateT s m) where
   get = Lens.view deepLens <$> MS.get
@@ -37,7 +39,6 @@ instance {-# OVERLAPPING #-} (Monad m, DeepLenses s s') => MonadDeepState s s' (
 instance {-# OVERLAPPABLE #-} (Monad (t m), MonadTrans t, MonadDeepState s s' m) => MonadDeepState s s' (t m) where
   get = lift get
   put = lift . put
-  modifyE = lift . modifyE
   state = lift . state
 
 gets ::
@@ -48,17 +49,13 @@ gets ::
 gets =
   (<$> get)
 
-modify ::
-  ∀ s' s m a .
-  MonadDeepState s s' m =>
-  (s' -> s') ->
-  m ()
-modify =
-  void . modifyE . (Right .)
-
 modifyL :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> a) -> m ()
 modifyL lens f =
   modify $ Lens.over lens f
+
+modifyML :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> m a) -> m ()
+modifyML lens f =
+  modifyM $ Lens.mapMOf lens f
 
 getL :: ∀ s' s m a. MonadDeepState s s' m => Lens' s' a -> m a
 getL =
