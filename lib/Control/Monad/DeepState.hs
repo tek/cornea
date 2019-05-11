@@ -21,9 +21,10 @@ class Monad m => MonadDeepState (s :: *) (s' :: *) (m :: * -> *) | m -> s where
   state f = do
     ~(a, s'') <- f <$> get
     a <$ put s''
-  modifyM :: (s' -> m s') -> m ()
-  modifyM f =
-    put =<< f =<< get
+  modifyM' :: (s' -> m s') -> m s'
+  modifyM' f = do
+    s' <- f =<< get
+    s' <$ put s'
   modify :: (s' -> s') -> m ()
   modify f =
     modifyM (pure . f)
@@ -48,6 +49,13 @@ gets ::
   m a
 gets =
   (<$> get)
+
+modifyM ::
+  MonadDeepState s s' m =>
+  (s' -> m s') ->
+  m ()
+modifyM =
+  void . modifyM'
 
 modifyL :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> a) -> m ()
 modifyL lens f =

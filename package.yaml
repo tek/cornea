@@ -16,13 +16,13 @@ extra-source-files:
 
 dependencies:
 - base >= 4.7 && < 5
+- either
 - lens
-- transformers
+- monad-control
 - mtl
 - template-haskell
 - th-abstraction
-- either
-- monad-control
+- transformers
 
 library:
  source-dirs: lib
