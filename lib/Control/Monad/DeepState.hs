@@ -17,10 +17,13 @@ import Data.DeepLenses (DeepLenses(deepLens))
 class Monad m => MonadDeepState (s :: *) (s' :: *) (m :: * -> *) | m -> s where
   get :: m s'
   put :: s' -> m ()
-  state :: (s' -> (a, s')) -> m a
-  state f = do
-    ~(a, s'') <- f <$> get
+  stateM :: (s' -> m (a, s')) -> m a
+  stateM f = do
+    ~(a, s'') <- f =<< get
     a <$ put s''
+  state :: (s' -> (a, s')) -> m a
+  state f =
+    stateM (pure . f)
   modifyM' :: (s' -> m s') -> m s'
   modifyM' f = do
     s' <- f =<< get
