@@ -27,6 +27,15 @@ catchAt handle ma =
   where
     f e = maybe (throwError e) handle (retrieve e)
 
+catchAs ::
+  ∀ e' e m a .
+  MonadDeepError e e' m =>
+  a ->
+  m a ->
+  m a
+catchAs =
+  catchAt @e' . const . return
+
 ignoreError ::
   ∀ e' e m .
   MonadDeepError e e' m =>
