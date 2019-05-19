@@ -1,3 +1,5 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+
 module Control.Monad.DeepError where
 
 import Control.Exception (Exception, IOException, SomeException)
@@ -14,11 +16,24 @@ instance (MonadError e m, DeepPrisms e e') => MonadDeepError e e' m where
   throwHoist =
     throwError . hoist
 
-catchAt :: ∀ e' e m a. (MonadError e m, DeepPrisms e e') => (e' -> m a) -> m a -> m a
+catchAt ::
+  ∀ e' e m a .
+  MonadDeepError e e' m =>
+  (e' -> m a) ->
+  m a ->
+  m a
 catchAt handle ma =
   catchError ma f
   where
     f e = maybe (throwError e) handle (retrieve e)
+
+ignoreError ::
+  ∀ e' e m .
+  MonadDeepError e e' m =>
+  m () ->
+  m ()
+ignoreError =
+  catchAt @e' (const (return ()))
 
 hoistEither :: MonadDeepError e e' m => Either e' a -> m a
 hoistEither =

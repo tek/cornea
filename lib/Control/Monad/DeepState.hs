@@ -4,12 +4,10 @@ module Control.Monad.DeepState where
 
 import Control.Lens (Lens')
 import qualified Control.Lens as Lens (mapMOf, over, set, view, views)
-import Control.Monad.State.Class (MonadState)
 import qualified Control.Monad.State.Class as MS (MonadState(get), modify)
 import Control.Monad.Trans.Class (MonadTrans(lift))
 import qualified Control.Monad.Trans.State.Lazy as Lazy (StateT)
 import Control.Monad.Trans.State.Strict (StateT)
-import Data.Either.Combinators (rightToMaybe, swapEither)
 import Data.Functor (void)
 
 import Data.DeepLenses (DeepLenses(deepLens))
