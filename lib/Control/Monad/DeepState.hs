@@ -62,6 +62,10 @@ modifyL :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> a) -> m ()
 modifyL lens f =
   modify $ Lens.over lens f
 
+modifyML' :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> m a) -> m a
+modifyML' lens f =
+  Lens.view lens <$> modifyM' (Lens.mapMOf lens f)
+
 modifyML :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> m a) -> m ()
 modifyML lens f =
   modifyM $ Lens.mapMOf lens f
