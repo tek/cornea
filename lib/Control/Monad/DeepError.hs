@@ -42,15 +42,30 @@ ignoreError ::
   m () ->
   m ()
 ignoreError =
-  catchAt @e' (const (return ()))
+  catchAs @e' ()
 
-hoistEither :: MonadDeepError e e' m => Either e' a -> m a
+hoistEither ::
+  MonadDeepError e e' m =>
+  Either e' a ->
+  m a
 hoistEither =
   either throwHoist return
 
-hoistEitherWith :: MonadDeepError e e'' m => (e' -> e'') -> Either e' a -> m a
+hoistEitherWith ::
+  MonadDeepError e e'' m =>
+  (e' -> e'') ->
+  Either e' a ->
+  m a
 hoistEitherWith f =
   hoistEither . mapLeft f
+
+hoistEitherAs ::
+  MonadDeepError e e'' m =>
+  e'' ->
+  Either e' a ->
+  m a
+hoistEitherAs =
+  hoistEitherWith . const
 
 hoistMaybe ::
   MonadDeepError e e' m =>
