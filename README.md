@@ -17,7 +17,7 @@ For `MonadError`:
 ```haskell
 {-# LANGUAGE TemplateHaskell #-}
 
-import Control.Monad.DeepError (MonadDeepError(throwHoist))
+import Cornea (MonadDeepError(throwHoist))
 import Control.Monad.Trans.Except (runExceptT)
 import Data.DeepPrisms (deepPrisms)
 
@@ -46,7 +46,7 @@ Analogously for `MonadState`:
 ```haskell
 {-# LANGUAGE TemplateHaskell #-}
 
-import Control.Monad.DeepState (MonadDeepState(get, gets, put))
+import Cornea (MonadDeepState(get, gets, put))
 import Control.Monad.Trans.State (execStateT)
 import Data.DeepLenses (deepLenses)
 

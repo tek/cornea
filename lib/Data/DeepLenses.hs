@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Data.DeepLenses where
 
 import Control.Lens (Lens', makeClassy)
@@ -47,8 +45,8 @@ mkHoist _ _ body = do
   funD name [clause [] body []]
 
 deepLensesInstance :: TypeQ -> TypeQ -> BodyQ -> DecQ
-deepLensesInstance top local body =
-  instanceD (cxt []) (appT (appT [t|DeepLenses|] top) local) [mkHoist top local body]
+deepLensesInstance top local' body =
+  instanceD (cxt []) (appT (appT [t|DeepLenses|] top) local') [mkHoist top local' body]
 
 idLenses :: Name -> DecQ
 idLenses name =
@@ -99,14 +97,14 @@ fieldLenses _ _ _ =
   return []
 
 dataLenses :: Name -> [Name] -> Name -> DecsQ
-dataLenses top intermediate local = do
-  (DT _ fields) <- dataType local
+dataLenses top intermediate local' = do
+  (DT _ fields) <- dataType local'
   join <$> traverse (fieldLenses top intermediate) fields
 
 dataLensesIfEligible :: Name -> [Name] -> Name -> DecsQ
-dataLensesIfEligible top intermediate local = do
-  eligible <- eligibleForDeepError local
-  if eligible then dataLenses top intermediate local else return []
+dataLensesIfEligible top intermediate local' = do
+  eligible <- eligibleForDeepError local'
+  if eligible then dataLenses top intermediate local' else return []
 
 lensesForMainData :: Name -> DecsQ
 lensesForMainData name = do

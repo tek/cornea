@@ -58,26 +58,55 @@ modifyM ::
 modifyM =
   void . modifyM'
 
-modifyL :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> a) -> m ()
+modifyL ::
+  ∀ s' s a m.
+  MonadDeepState s s' m =>
+  Lens' s' a ->
+  (a -> a) ->
+  m ()
 modifyL lens f =
   modify $ Lens.over lens f
 
-modifyML' :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> m a) -> m a
+modifyML' ::
+  ∀ s' s a m.
+  MonadDeepState s s' m =>
+  Lens' s' a ->
+  (a -> m a) ->
+  m a
 modifyML' lens f =
   Lens.view lens <$> modifyM' (Lens.mapMOf lens f)
 
-modifyML :: ∀ s' s a m. MonadDeepState s s' m => Lens' s' a -> (a -> m a) -> m ()
+modifyML ::
+  ∀ s' s a m.
+  MonadDeepState s s' m =>
+  Lens' s' a ->
+  (a -> m a) ->
+  m ()
 modifyML lens f =
   modifyM $ Lens.mapMOf lens f
 
-getL :: ∀ s' s m a. MonadDeepState s s' m => Lens' s' a -> m a
+getL ::
+  ∀ s' s m a.
+  MonadDeepState s s' m =>
+  Lens' s' a ->
+  m a
 getL =
   gets . Lens.view
 
-getsL :: ∀ s' s m a b. MonadDeepState s s' m => Lens' s' a -> (a -> b) -> m b
+getsL ::
+  ∀ s' s m a b.
+  MonadDeepState s s' m =>
+  Lens' s' a ->
+  (a -> b) ->
+  m b
 getsL lens =
   gets . Lens.views lens
 
-setL :: ∀ s' s m a. MonadDeepState s s' m => Lens' s' a -> a -> m ()
+setL ::
+  ∀ s' s m a.
+  MonadDeepState s s' m =>
+  Lens' s' a ->
+  a ->
+  m ()
 setL lens =
   modify . Lens.set lens

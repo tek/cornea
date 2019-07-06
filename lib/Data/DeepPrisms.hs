@@ -1,6 +1,3 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 module Data.DeepPrisms where
 
 import Control.Lens (Prism', makeClassyPrisms)
@@ -72,8 +69,8 @@ mkHoist _ _ body = do
   funD name [clause [] body []]
 
 deepPrismsInstance :: TypeQ -> TypeQ -> BodyQ -> DecQ
-deepPrismsInstance top local body =
-  instanceD (cxt []) (appT (appT [t|DeepPrisms|] top) local) [mkHoist top local body]
+deepPrismsInstance top local' body =
+  instanceD (cxt []) (appT (appT [t|DeepPrisms|] top) local') [mkHoist top local' body]
 
 idInstance :: Name -> DecQ
 idInstance name =
@@ -140,8 +137,8 @@ basicPrisms name = do
   if length ctors > 1 then makeClassyPrisms name else return []
 
 prismsForData :: Name -> [Name] -> Name -> Q [PrismsInstance]
-prismsForData top intermediate local = do
-  cons <- deepPrismCtors local
+prismsForData top intermediate local' = do
+  cons <- deepPrismCtors local'
   localInstances <- traverse (constructorPrism top intermediate) cons
   deepInstances <- traverse recurse cons
   return (localInstances ++ (deepInstances >>= filterDuplicates cons))

@@ -1,9 +1,6 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
-{-# LANGUAGE TemplateHaskell #-}
 
-module DeepErrorSpec(
-  htf_thisModulesTests,
-) where
+module DeepErrorSpec (htf_thisModulesTests) where
 
 import Control.Monad (when)
 import Control.Monad.Trans.Except (runExceptT)

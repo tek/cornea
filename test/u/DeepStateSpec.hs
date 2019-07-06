@@ -1,11 +1,7 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
-{-# LANGUAGE TemplateHaskell #-}
 
-module DeepStateSpec(
-  htf_thisModulesTests,
-) where
+module DeepStateSpec (htf_thisModulesTests) where
 
-import Control.Monad.Trans.State (execStateT)
 import Test.Framework
 
 import Control.Monad.DeepState (MonadDeepState(get, put), gets)

@@ -15,11 +15,12 @@ extra-source-files:
 - README.md
 
 dependencies:
-- base >= 4.7 && < 5
+- base-noprelude >= 4.7 && < 5
 - either
 - lens
 - monad-control
 - mtl
+- relude
 - template-haskell
 - th-abstraction
 - transformers
@@ -62,6 +63,7 @@ default-extensions:
 - RecordWildCards
 - ScopedTypeVariables
 - StandaloneDeriving
+- TemplateHaskell
 - TupleSections
 - TypeApplications
 - TypeFamilies
