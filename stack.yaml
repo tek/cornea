@@ -1,5 +1,5 @@
-resolver: lts-12.26
+resolver: lts-13.27
 packages:
 - .
 extra-deps:
-- base-noprelude-4.11.1.0
+- base-noprelude-4.12.0.0

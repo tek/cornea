@@ -2,6 +2,7 @@
 
 module DeepErrorSpec (htf_thisModulesTests) where
 
+import qualified Data.String as String (lines)
 import Control.Monad (when)
 import Control.Monad.Trans.Except (runExceptT)
 import Data.Foldable (traverse_)
@@ -65,7 +66,7 @@ throwDeep =
 
 debugPrint :: IO ()
 debugPrint =
-  traverse_ putStrLn $ lines $(stringE . pprint =<< deepPrisms ''Err2)
+  traverse_ putStrLn . String.lines $ $(stringE . pprint =<< deepPrisms ''Err2)
 
 test_hoist :: IO ()
 test_hoist = do
