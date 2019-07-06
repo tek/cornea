@@ -3,6 +3,7 @@
 module Control.Monad.DeepError where
 
 import Control.Exception (Exception, IOException, SomeException)
+import Control.Exception.Lifted (try)
 import Control.Monad.Error.Class (MonadError(throwError, catchError))
 import Control.Monad.Trans.Control (MonadBaseControl)
 
@@ -80,39 +81,56 @@ tryHoist ::
   MonadDeepError e e' m =>
   Exception ex =>
   (ex -> e') ->
-  m ()
-tryHoist =
-  undefined
+  m a ->
+  m a
+tryHoist f =
+  hoistEitherWith f <=< try
+
+tryHoistAs ::
+  ∀ ex e e' m a .
+  MonadBaseControl IO m =>
+  MonadDeepError e e' m =>
+  Exception ex =>
+  e' ->
+  m a ->
+  m a
+tryHoistAs e =
+  hoistEitherAs e <=< try @m @ex
 
 tryHoistIO ::
   MonadBaseControl IO m =>
   MonadDeepError e e' m =>
   (IOException -> e') ->
-  m ()
+  m a ->
+  m a
 tryHoistIO =
-  undefined
+  tryHoist
 
 tryHoistIOAs ::
   MonadBaseControl IO m =>
   MonadDeepError e e' m =>
   e' ->
-  m ()
+  m a ->
+  m a
 tryHoistIOAs =
-  undefined
+  tryHoistAs @IOException
 
 tryHoistAny ::
   MonadBaseControl IO m =>
   MonadDeepError e e' m =>
   (SomeException -> e') ->
-  m ()
+  m a ->
+  m a
 tryHoistAny =
-  undefined
+  tryHoist
 
 tryHoistAnyAs ::
+  MonadBaseControl IO m =>
   MonadDeepError e e' m =>
   e' ->
-  m ()
+  m a ->
+  m a
 tryHoistAnyAs =
-  undefined
+  tryHoistAs @SomeException
 
 -- TODO derive multiple errors with HList + Generic
