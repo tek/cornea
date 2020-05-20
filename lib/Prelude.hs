@@ -4,4 +4,4 @@ module Prelude (
 ) where
 
 import GHC.Err (undefined)
-import Relude hiding (Type, modify, gets, get, put, state, undefined, hoistEither)
+import Relude hiding (Type, ask, asks, get, gets, hoistEither, local, modify, put, state, undefined)

@@ -1,5 +1,3 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-
 module Control.Monad.DeepError where
 
 import Control.Exception (Exception, IOException, SomeException)

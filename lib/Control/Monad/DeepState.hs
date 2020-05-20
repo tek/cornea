@@ -1,5 +1,3 @@
-{-# LANGUAGE UndecidableInstances #-}
-
 module Control.Monad.DeepState where
 
 import Control.Lens (Lens')
