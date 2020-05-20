@@ -3,12 +3,14 @@
 module Cornea (
   module Control.Monad.DeepError,
   module Control.Monad.DeepState,
+  module Control.Monad.DeepReader,
   module Data.DeepLenses,
   module Data.DeepPrisms,
   modify,
 ) where
 
 import Control.Monad.DeepError
+import Control.Monad.DeepReader
 import qualified Control.Monad.DeepState as DeepState (modify)
 import Control.Monad.DeepState hiding (modify)
 import Data.DeepLenses (deepLenses)
