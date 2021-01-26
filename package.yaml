@@ -1,5 +1,5 @@
 name: cornea
-version: 0.3.0.1
+version: 0.3.1.2
 synopsis: classy optical monadic state
 description: Please see the README on GitHub at <https://github.com/tek/cornea>
 github: "tek/cornea"
@@ -15,7 +15,6 @@ extra-source-files:
 - README.md
 
 dependencies:
-  # - HTF
   - base-noprelude >= 4.7 && < 5
   - either
   - lens
