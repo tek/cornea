@@ -1,11 +1,8 @@
-{-# OPTIONS_GHC -F -pgmF htfpp #-}
+module DeepStateSpec where
 
-module DeepReaderSpec (htf_thisModulesTests) where
-
-import Test.Framework
-
-import Control.Monad.DeepReader (MonadDeepReader(ask), asks)
+import Control.Monad.DeepState (MonadDeepState(get, put), gets)
 import Data.DeepLenses (deepLenses)
+import Hedgehog (TestT, (===))
 
 newtype S1 =
   S1 Int
@@ -46,13 +43,13 @@ newtype MainS =
 
 deepLenses ''MainS
 
-stateDeep :: MonadDeepReader r S m => m S
+stateDeep :: MonadDeepState s S m => m ()
 stateDeep = do
-  (SC (S1 a)) <- ask
-  b <- asks $ \(SC (S1 b)) -> b
-  pure (SC (S1 (a + b + 3)))
+  (SC (S1 a)) <- get
+  b <- gets $ \(SC (S1 b)) -> b
+  put (SC (S1 (a + b + 3)))
 
-test_reader :: IO ()
-test_reader = do
-  a <- runReaderT stateDeep (MainSC (MiddleSC (BotC (SC (S1 5))) (S2 1)))
-  assertEqual (SC (S1 13)) a
+test_lens :: TestT IO ()
+test_lens = do
+  a <- execStateT stateDeep (MainSC (MiddleSC (BotC (SC (S1 5))) (S2 1)))
+  MainSC (MiddleSC (BotC (SC (S1 13))) (S2 1)) === a

@@ -1,50 +1,82 @@
 name: cornea
-version: 0.3.1.2
+version: 0.3.1.3
 synopsis: classy optical monadic state
 description: Please see the README on GitHub at <https://github.com/tek/cornea>
-github: "tek/cornea"
-license: OtherLicense
+github: tek/cornea
+license: BSD-2-Clause-Patent
 license-file: LICENSE
-author: "Torsten Schmits"
-maintainer: "tek@tryp.io"
-copyright: "2019 Torsten Schmits"
+author: Torsten Schmits
+maintainer: tek@tryp.io
+copyright: 2021 Torsten Schmits
 category: Lens
 build-type: Simple
 
 extra-source-files:
-- README.md
+- readme.md
 
 dependencies:
-  - base-noprelude >= 4.7 && < 5
-  - either
-  - lens
-  - lifted-base
-  - monad-control
+  - name: base
+    version: '>= 4 && < 5'
+    mixin:
+      hiding (Prelude)
+  - either ^>= 5.0.1
+  - lens >= 4 && < 5
+  - lifted-base < 0.3
+  - monad-control ^>= 1.0
   - mtl
-  - relude
+  - relude >= 0.7 && < 1.2
   - template-haskell
-  - th-abstraction
+  - th-abstraction >= 0.3 && < 0.5
   - transformers
 
 library:
   source-dirs: lib
   other-modules:
     - Prelude
+  generated-other-modules:
+    - Paths_cornea
+
+ghc-options:
+  - -Wall
+  - -Wredundant-constraints
+  - -Wsimplifiable-class-constraints
+
+tests:
+  cornea-unit:
+    main: Main.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - name: cornea
+        mixin:
+          - (Cornea.Prelude as Prelude)
+          - hiding (Cornea.Prelude)
+      - hedgehog
+      - tasty
+      - tasty-hedgehog
 
 default-extensions:
   - AllowAmbiguousTypes
-  - AutoDeriveTypeable
+  - ApplicativeDo
   - BangPatterns
   - BinaryLiterals
+  - BlockArguments
   - ConstraintKinds
   - DataKinds
   - DefaultSignatures
+  - DeriveAnyClass
   - DeriveDataTypeable
   - DeriveFoldable
   - DeriveFunctor
   - DeriveGeneric
   - DeriveTraversable
+  - DerivingStrategies
+  - DisambiguateRecordFields
   - DoAndIfThenElse
+  - DuplicateRecordFields
   - EmptyDataDecls
   - ExistentialQuantification
   - FlexibleContexts
@@ -55,35 +87,31 @@ default-extensions:
   - InstanceSigs
   - KindSignatures
   - LambdaCase
-  - MonadFailDesugaring
+  - LiberalTypeSynonyms
   - MultiParamTypeClasses
   - MultiWayIf
   - NamedFieldPuns
   - OverloadedStrings
+  - OverloadedLists
+  - PackageImports
   - PartialTypeSignatures
   - PatternGuards
+  - PatternSynonyms
   - PolyKinds
+  - QuantifiedConstraints
+  - QuasiQuotes
   - RankNTypes
   - RecordWildCards
+  - RecursiveDo
   - ScopedTypeVariables
   - StandaloneDeriving
   - TemplateHaskell
   - TupleSections
   - TypeApplications
   - TypeFamilies
+  - TypeFamilyDependencies
+  - TypeOperators
   - TypeSynonymInstances
   - UndecidableInstances
   - UnicodeSyntax
   - ViewPatterns
-
-tests:
-  cornea-unit:
-    main: SpecMain.hs
-    source-dirs: test/u
-    ghc-options:
-      - -threaded
-      - -rtsopts
-      - -with-rtsopts=-N
-    dependencies:
-      - cornea
-      - HTF

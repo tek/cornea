@@ -1,0 +1,7 @@
+cradle:
+  cabal:
+    - path: "./packages/cornea/lib"
+      component: "lib:cornea"
+
+    - path: "./packages/cornea/test"
+      component: "cornea:test:cornea-unit"

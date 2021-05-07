@@ -1,4 +1,6 @@
-module Prelude (
+{-# language NoImplicitPrelude #-}
+
+module Cornea.Prelude (
   module Relude,
   undefined,
 ) where

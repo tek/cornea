@@ -1,12 +1,12 @@
 module Control.Monad.DeepError where
 
-import Control.Exception (Exception, IOException, SomeException)
+import Data.DeepPrisms (DeepPrisms, hoist, retrieve)
+import Data.Either.Combinators (mapLeft)
+
+import Control.Exception (IOException)
 import Control.Exception.Lifted (try)
 import Control.Monad.Error.Class (MonadError(throwError, catchError))
 import Control.Monad.Trans.Control (MonadBaseControl)
-
-import Data.DeepPrisms (DeepPrisms, hoist, retrieve)
-import Data.Either.Combinators (mapLeft)
 
 class (MonadError e m, DeepPrisms e e') => MonadDeepError e e' m where
   throwHoist :: e' -> m a

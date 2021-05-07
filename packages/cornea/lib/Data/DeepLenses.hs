@@ -1,8 +1,6 @@
 module Data.DeepLenses where
 
 import Control.Lens (Lens', makeClassy)
-import Control.Monad (join)
-import Data.List (zipWith)
 import Language.Haskell.TH
 import Language.Haskell.TH.Datatype (
   ConstructorInfo(ConstructorInfo),

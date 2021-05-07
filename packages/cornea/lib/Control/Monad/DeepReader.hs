@@ -1,11 +1,10 @@
 module Control.Monad.DeepReader where
 
+import Data.DeepLenses (DeepLenses(deepLens))
+
 import Control.Lens (over)
 import qualified Control.Lens as Lens (view)
 import qualified Control.Monad.Reader.Class as MR (MonadReader(ask))
-import Control.Monad.Trans.Reader (ReaderT)
-
-import Data.DeepLenses (DeepLenses(deepLens))
 
 class Monad m => MonadDeepReader (r :: *) (r' :: *) (m :: * -> *) | m -> r where
   ask :: m r'

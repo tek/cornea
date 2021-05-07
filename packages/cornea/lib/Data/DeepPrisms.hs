@@ -2,8 +2,6 @@ module Data.DeepPrisms where
 
 import Control.Lens (Prism', makeClassyPrisms)
 import qualified Control.Lens as Lens (preview, review)
-import Control.Monad (filterM, (<=<))
-import Data.Maybe (mapMaybe)
 import Language.Haskell.TH
 import Language.Haskell.TH.Datatype (
   ConstructorInfo(constructorName, constructorFields),

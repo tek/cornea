@@ -1,16 +1,10 @@
-{-# OPTIONS_GHC -F -pgmF htfpp #-}
-
-module DeepErrorSpec (htf_thisModulesTests) where
-
-import qualified Data.String as String (lines)
-import Control.Monad (when)
-import Control.Monad.Trans.Except (runExceptT)
-import Data.Foldable (traverse_)
-import Language.Haskell.TH
-import Test.Framework
+module DeepErrorSpec where
 
 import Control.Monad.DeepError (MonadDeepError(throwHoist))
 import Data.DeepPrisms (deepPrisms)
+import qualified Data.String as String (lines)
+import Hedgehog (TestT, (===))
+import Language.Haskell.TH
 
 newtype Err1 =
   Err1 Int
@@ -68,10 +62,10 @@ debugPrint :: IO ()
 debugPrint =
   traverse_ putStrLn . String.lines $ $(stringE . pprint =<< deepPrisms ''Err2)
 
-test_hoist :: IO ()
+test_hoist :: TestT IO ()
 test_hoist = do
-  when debug debugPrint
+  liftIO (when debug debugPrint)
   a <- runExceptT throwDeep
-  assertEqual (Left (MainErrC (MiddleErrC (BotC (ErrC (Err1 5)))))) a
+  Left (MainErrC (MiddleErrC (BotC (ErrC (Err1 5))))) === a
   where
     debug = False
