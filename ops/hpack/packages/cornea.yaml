@@ -19,14 +19,14 @@ dependencies:
     version: '>= 4 && < 5'
     mixin:
       hiding (Prelude)
-  - either ^>= 5.0.1
-  - lens >= 4 && < 5
+  - either >= 5.0.1
+  - lens >= 4
   - lifted-base < 0.3
-  - monad-control ^>= 1.0
+  - monad-control >= 1.0
   - mtl
-  - relude >= 0.7 && < 1.2
+  - relude >= 0.7
   - template-haskell
-  - th-abstraction >= 0.3 && < 0.5
+  - th-abstraction >= 0.3
   - transformers
 
 library:

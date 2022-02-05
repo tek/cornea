@@ -85,8 +85,8 @@ getL ::
   MonadDeepState s s' m =>
   Lens' s' a ->
   m a
-getL =
-  gets . Lens.view
+getL l =
+  gets (Lens.view l)
 
 getsL ::
   ∀ s' s m a b.

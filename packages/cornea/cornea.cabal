@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.6.
 --
 -- see: https://github.com/sol/hpack
 
@@ -100,14 +100,14 @@ library
   ghc-options: -Wall -Wredundant-constraints -Wsimplifiable-class-constraints
   build-depends:
       base ==4.*
-    , either >=5.0.1 && <5.1
-    , lens ==4.*
+    , either >=5.0.1
+    , lens >=4
     , lifted-base <0.3
-    , monad-control ==1.0.*
+    , monad-control >=1.0
     , mtl
-    , relude >=0.7 && <1.2
+    , relude >=1
     , template-haskell
-    , th-abstraction >=0.3 && <0.5
+    , th-abstraction >=0.3
     , transformers
   mixins:
       base hiding (Prelude)
@@ -120,6 +120,8 @@ test-suite cornea-unit
       DeepErrorSpec
       DeepReaderSpec
       DeepStateSpec
+      Paths_cornea
+  autogen-modules:
       Paths_cornea
   hs-source-dirs:
       test
@@ -184,17 +186,17 @@ test-suite cornea-unit
   build-depends:
       base ==4.*
     , cornea
-    , either >=5.0.1 && <5.1
+    , either >=5.0.1
     , hedgehog
-    , lens ==4.*
+    , lens >=4
     , lifted-base <0.3
-    , monad-control ==1.0.*
+    , monad-control >=1.0
     , mtl
-    , relude >=0.7 && <1.2
+    , relude >=1
     , tasty
     , tasty-hedgehog
     , template-haskell
-    , th-abstraction >=0.3 && <0.5
+    , th-abstraction >=0.3
     , transformers
   mixins:
       base hiding (Prelude)
